@@ -4,6 +4,7 @@
   "description": "VA-friendly ROAS calculator for Fluent Affiliate Network (revenue hidden)",
   "private": true,
   "scripts": {
+    "build": "echo 'No build step required - static site with serverless functions'",
     "dev": "netlify dev",
     "deploy": "netlify deploy --prod"
   },
