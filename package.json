@@ -1,0 +1,17 @@
+{
+  "name": "fluent-roas-calculator-netlify",
+  "version": "1.0.0",
+  "description": "VA-friendly ROAS calculator for Fluent Affiliate Network (revenue hidden)",
+  "private": true,
+  "scripts": {
+    "dev": "netlify dev",
+    "deploy": "netlify deploy --prod"
+  },
+  "dependencies": {
+    "axios": "^1.6.2",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.10.1"
+  }
+}

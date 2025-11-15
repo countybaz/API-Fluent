@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROAS Calculator - Fluent Affiliate</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 35px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        input[type="date"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .date-range {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 35px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 12px;
+            display: none;
+            text-align: center;
+        }
+
+        .result.show {
+            display: block;
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result h2 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 18px;
+        }
+
+        .roas-value {
+            font-size: 72px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 15px 0;
+            letter-spacing: -2px;
+        }
+
+        .roas-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .performance-indicator {
+            margin-top: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .performance-excellent {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .performance-good {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 2px solid #bee5eb;
+        }
+
+        .performance-poor {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .metric-row:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .metric-value {
+            font-weight: 700;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .error {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+        }
+
+        .error h2 {
+            color: white;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
+
+        .info-text {
+            font-size: 12px;
+            color: #999;
+            margin-top: 6px;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-right: 10px;
+        }
+
+        .privacy-note {
+            margin-top: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 ROAS Calculator</h1>
+        <p class="subtitle">Fluent Affiliate Network - VA Dashboard</p>
+
+        <div class="form-group">
+            <label>
+                <span class="step-number">1</span>
+                Select Date Range
+            </label>
+            <div class="date-range">
+                <div>
+                    <input type="date" id="startDate">
+                    <p class="info-text">Start Date</p>
+                </div>
+                <div>
+                    <input type="date" id="endDate">
+                    <p class="info-text">End Date</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>
+                <span class="step-number">2</span>
+                Select Offer
+            </label>
+            <select id="offer" onchange="loadSubIds()">
+                <option value="">-- Loading offers... --</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>
+                <span class="step-number">3</span>
+                Select Sub ID
+            </label>
+            <select id="subId">
+                <option value="all">All Sub IDs</option>
+            </select>
+            <p class="info-text">Select a specific Sub ID or use "All Sub IDs" for combined data</p>
+        </div>
+
+        <div class="form-group">
+            <label>
+                <span class="step-number">4</span>
+                Enter Ad Spend ($)
+            </label>
+            <input type="number" id="adSpend" placeholder="Enter your ad spend" step="0.01" min="0">
+        </div>
+
+        <button onclick="calculateROAS()">📊 Calculate ROAS</button>
+
+        <!-- Results - ONLY ROAS SHOWN -->
+        <div id="result" class="result">
+            <h2>Your ROAS Result</h2>
+            <div class="roas-value" id="roasValue">-</div>
+            <p class="roas-label">Return on Ad Spend</p>
+            
+            <div id="performanceIndicator" class="performance-indicator"></div>
+
+            <div style="margin-top: 20px;">
+                <div class="metric-row">
+                    <span class="metric-label">Ad Spend:</span>
+                    <span class="metric-value" id="spend">$0.00</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="privacy-note">
+            🔒 <strong>Privacy:</strong> Revenue and performance details are hidden for security. Only ROAS is displayed.
+        </div>
+    </div>
+
+    <script>
+        // API endpoints - will use Netlify Functions
+        const API_BASE = '/.netlify/functions';
+
+        // Set default dates (last 7 days)
+        window.onload = function() {
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 7);
+
+            document.getElementById('endDate').value = formatDateInput(endDate);
+            document.getElementById('startDate').value = formatDateInput(startDate);
+
+            loadOffers();
+        };
+
+        function formatDateInput(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function formatDateAPI(dateString) {
+            const date = new Date(dateString);
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${month}-${day}-${year}`;
+        }
+
+        async function loadOffers() {
+            const offerSelect = document.getElementById('offer');
+            offerSelect.innerHTML = '<option value="">Loading offers...</option>';
+
+            try {
+                const response = await fetch(`${API_BASE}/offers`);
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.error);
+                }
+
+                offerSelect.innerHTML = '<option value="">-- Select an offer --</option>';
+                
+                data.offers.forEach(offer => {
+                    const option = document.createElement('option');
+                    option.value = offer.offer_id;
+                    option.textContent = offer.offer_name;
+                    offerSelect.appendChild(option);
+                });
+
+            } catch (error) {
+                console.error('Error loading offers:', error);
+                offerSelect.innerHTML = '<option value="">Error loading offers</option>';
+                alert('Error loading offers: ' + error.message);
+            }
+        }
+
+        async function loadSubIds() {
+            const offerId = document.getElementById('offer').value;
+            const subIdSelect = document.getElementById('subId');
+            
+            if (!offerId) {
+                subIdSelect.innerHTML = '<option value="all">All Sub IDs</option>';
+                return;
+            }
+
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (!startDate || !endDate) {
+                alert('Please select a date range first');
+                return;
+            }
+
+            subIdSelect.innerHTML = '<option value="">Loading Sub IDs...</option>';
+
+            try {
+                const response = await fetch(`${API_BASE}/subids`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        offer_id: offerId,
+                        start_date: formatDateAPI(startDate),
+                        end_date: formatDateAPI(endDate)
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.error);
+                }
+
+                subIdSelect.innerHTML = '<option value="all">All Sub IDs</option>';
+                
+                // ⚠️ PRIVACY: Sub IDs shown WITHOUT revenue data
+                data.subIds.forEach(sub => {
+                    const option = document.createElement('option');
+                    option.value = sub.sub_id;
+                    option.textContent = sub.sub_id_name;  // Name only, no revenue preview
+                    subIdSelect.appendChild(option);
+                });
+
+            } catch (error) {
+                console.error('Error loading sub IDs:', error);
+                subIdSelect.innerHTML = '<option value="all">All Sub IDs</option>';
+            }
+        }
+
+        async function calculateROAS() {
+            const adSpend = parseFloat(document.getElementById('adSpend').value);
+            const offerId = document.getElementById('offer').value;
+            const subId = document.getElementById('subId').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const resultDiv = document.getElementById('result');
+
+            // Validation
+            if (!startDate || !endDate) {
+                alert('Please select a date range');
+                return;
+            }
+
+            if (!offerId) {
+                alert('Please select an offer');
+                return;
+            }
+
+            if (!adSpend || adSpend <= 0) {
+                alert('Please enter a valid ad spend amount');
+                return;
+            }
+
+            // Show loading
+            resultDiv.classList.remove('error');
+            resultDiv.classList.add('show');
+            resultDiv.innerHTML = '<p class="loading">📊 Calculating your ROAS...</p>';
+
+            try {
+                const response = await fetch(`${API_BASE}/calculate-roas`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        offer_id: offerId,
+                        sub_id: subId,
+                        start_date: formatDateAPI(startDate),
+                        end_date: formatDateAPI(endDate),
+                        ad_spend: adSpend
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.error);
+                }
+
+                displayResults(data.results);
+
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.classList.add('error');
+                resultDiv.innerHTML = `
+                    <h2>Error</h2>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+
+        function displayResults(results) {
+            const resultDiv = document.getElementById('result');
+            const roasValue = results.roas;
+            
+            resultDiv.classList.remove('error');
+            resultDiv.classList.add('show');
+            
+            // Display ROAS - ONLY metric shown to VA
+            document.getElementById('roasValue').textContent = roasValue.toFixed(2) + 'x';
+            document.getElementById('spend').textContent = '$' + results.ad_spend.toFixed(2);
+
+            // Performance indicator
+            const indicator = document.getElementById('performanceIndicator');
+            if (roasValue >= 3.0) {
+                indicator.className = 'performance-indicator performance-excellent';
+                indicator.textContent = '🌟 Excellent Performance! (3.0x+ ROAS)';
+            } else if (roasValue >= 2.0) {
+                indicator.className = 'performance-indicator performance-good';
+                indicator.textContent = '✅ Good Performance (2.0x+ ROAS)';
+            } else if (roasValue >= 1.0) {
+                indicator.className = 'performance-indicator performance-good';
+                indicator.textContent = '💚 Profitable (Above 1.0x ROAS)';
+            } else {
+                indicator.className = 'performance-indicator performance-poor';
+                indicator.textContent = '⚠️ Below Break-Even (Under 1.0x ROAS)';
+            }
+        }
+    </script>
+</body>
+</html>
